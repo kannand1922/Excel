@@ -21,6 +21,15 @@ function CategoryCards() {
 
   return (
     <div style={styles.container}>
+      {/* Back Button */}
+      <Button
+        onClick={() => navigate(-1)} // Navigates to the previous page
+        variant="contained"
+        style={styles.backButton}
+      >
+        Back
+      </Button>
+
       <Typography variant="h3" style={styles.title}>
         CATEGORY LIST
       </Typography>
@@ -49,12 +58,6 @@ function CategoryCards() {
                 >
                   View Details
                 </Button>
-                {/* <IconButton
-                  onClick={() => handleNavigate(Category)}
-                  style={styles.arrowButton}
-                >
-                  <ArrowForwardIcon />
-                </IconButton> */}
               </CardActions>
             </Card>
           </Grid>
@@ -66,7 +69,7 @@ function CategoryCards() {
 
 const styles = {
   container: {
-    padding: "40px 50px",
+    padding: "70px",
     backgroundColor: "#121212",
     color: "#FFD700",
     minHeight: "100vh",
@@ -122,8 +125,17 @@ const styles = {
       backgroundColor: "#FFC107",
     },
   },
-  arrowButton: {
-    color: "#FFD700",
+  backButton: {
+    float: "right",
+    marginBottom: "40px",
+    backgroundColor: "#FFD700",
+    color: "#000",
+    fontWeight: "bold",
+    fontSize: "1.2rem",
+    padding: "10px 20px",
+    "&:hover": {
+      backgroundColor: "#FFC107",
+    },
   },
 };
 
