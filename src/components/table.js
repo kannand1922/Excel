@@ -6,52 +6,83 @@ import {
   Card,
   CardContent,
   CardMedia,
-  // MenuItem,
-  // Select,
-  // FormControl,
-  // InputLabel,
   Button,
   Divider,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   IconButton,
+  Stack,
 } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import FilterListIcon from "@mui/icons-material/FilterList"; // Filter Icon
 
 function ListTable() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Parse the query parameters from the URL
   const searchParams = new URLSearchParams(location.search);
   const list = searchParams.get("list");
   const category = searchParams.get("category");
 
   const listData = JSON.parse(localStorage.getItem("excelData")) || {};
-  const data = listData[list];
+  const data = listData[list] || [];
 
-  const [selectedBrand, setSelectedBrand] = useState("");
+  const [filters, setFilters] = useState({
+    item: "",
+    category: "",
+    brand: "",
+    cost: "",
+    age: "",
+    type: "",
+  });
 
-  if (!data) {
+  const [openFilterModal, setOpenFilterModal] = useState(false); // Modal state
+
+  const uniqueValues = (key) => {
+    const values = [...new Set(data.map((row) => row[key]))];
+    return values.length > 0 ? values : null;
+  };
+
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const filteredData = data.filter((row) => {
     return (
-      <Typography variant="h4" style={styles.noData}>
-        No data available for {list}
-      </Typography>
+      (!filters.item || row.ITEM === list) &&
+      (filters.category || row.CATEGORY === category) &&
+      (!filters.brand || row.BRAND === filters.brand) &&
+      (!filters.cost || row.COST === filters.cost) &&
+      (!filters.age || row.AGE === filters.age) &&
+      (!filters.type || row.TYPE === filters.type)
     );
-  }
-
-  // const uniqueBrands = [...new Set(data.map((row) => row.BRAND))];
-  const categoryFilteredData =
-    category && list
-      ? data.filter((row) => row.ITEM === list && row.CATEGORY === category)
-      : data;
+  });
 
   const handleMoreDetails = (brand) => {
     navigate(`/itemDetails?list=${list}&category=${category}&brand=${brand}`);
   };
 
+  const openFilterDialog = () => {
+    setOpenFilterModal(true); // Open modal
+  };
+
+  const closeFilterDialog = () => {
+    setOpenFilterModal(false); // Close modal
+  };
+
   return (
     <div style={styles.container}>
       <Button
-        onClick={() => navigate(-1)}
+        onClick={() => navigate(-1)} // Navigates to the previous page
         variant="contained"
         style={styles.backButton}
       >
@@ -62,55 +93,123 @@ function ListTable() {
         {list} ITEMS
       </Typography>
 
-      {/* <FormControl variant="outlined" style={styles.dropdown}>
-        <InputLabel style={styles.inputLabel} htmlFor="select-brand">
-          Select Brand
-        </InputLabel>
-        <Select
-          value={selectedBrand}
-          onChange={(e) => setSelectedBrand(e.target.value)}
-          label="Select Brand"
-          id="select-brand"
-          sx={{
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#FFD700",
-            },
-            "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#FFC107",
-            },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#FFD700",
-            },
-            "& .MuiSelect-icon": {
-              color: "#FFD700",
-            },
-            "& .MuiInputBase-input": {
-              color: "#FFD700",
-            },
-          }}
+      {/* Filter Button */}
+      <Stack direction="row" spacing={3}>
+        <Typography variant="h6" color="primary" style={styles.filterTExt}>
+          Filter
+        </Typography>
+        <IconButton
+          color="primary"
+          style={styles.filterButton}
+          onClick={openFilterDialog}
         >
-          <MenuItem value="">
-            <em>All Brands</em>
-          </MenuItem>
-          {uniqueBrands.map((brand) => (
-            <MenuItem key={brand} value={brand}>
-              {brand}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl> */}
+          <FilterListIcon fontSize="large" />
+        </IconButton>
+      </Stack>
 
+      {/* Filter Modal */}
+      <Dialog open={openFilterModal} onClose={closeFilterDialog}>
+        <DialogTitle style={styles.dialogTitle}>FILTER ITEMS</DialogTitle>
+        <DialogContent style={styles.dialogContent}>
+          <Stack direction="row" flexWrap="wrap" spacing={4}>
+            {uniqueValues("BRAND") && (
+              <FormControl variant="outlined" style={styles.dropdown}>
+                <InputLabel style={styles.inputLabel}>
+                  Filter By Brand
+                </InputLabel>
+                <Select
+                  value={filters.brand}
+                  onChange={(e) => handleFilterChange("brand", e.target.value)}
+                  label="Filter By Brand"
+                  style={styles.select}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {uniqueValues("BRAND").map((value, index) => (
+                    <MenuItem key={index} value={value}>
+                      {value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+
+            {uniqueValues("COST")[0] && (
+              <FormControl
+                variant="outlined"
+                style={styles.dropdown}
+                sx={{ margin: "20px" }}
+              >
+                <InputLabel style={styles.inputLabel}>
+                  Filter By Cost
+                </InputLabel>
+                <Select
+                  value={filters.cost}
+                  onChange={(e) => handleFilterChange("cost", e.target.value)}
+                  label="Filter By Cost"
+                  style={styles.select}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {uniqueValues("COST").map((value, index) => (
+                    <MenuItem key={index} value={value}>
+                      {value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+
+            {uniqueValues("AGE")[0] && (
+              <FormControl variant="outlined" style={styles.dropdown}>
+                <InputLabel style={styles.inputLabel}>Filter By Age</InputLabel>
+                <Select
+                  value={filters.age}
+                  onChange={(e) => handleFilterChange("age", e.target.value)}
+                  label="Filter By Age"
+                  style={styles.select}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {uniqueValues("AGE").map((value, index) => (
+                    <MenuItem key={index} value={value}>
+                      {value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+
+            {uniqueValues("TYPE")[0] && (
+              <FormControl variant="outlined" style={styles.dropdown}>
+                <InputLabel style={styles.inputLabel}>
+                  Filter By Type
+                </InputLabel>
+                <Select
+                  value={filters.type}
+                  onChange={(e) => handleFilterChange("type", e.target.value)}
+                  label="Filter By Type"
+                  style={styles.select}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {uniqueValues("TYPE").map((value, index) => (
+                    <MenuItem key={index} value={value}>
+                      {value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions style={styles.dialogActions}>
+          <Button onClick={closeFilterDialog} style={styles.closeButton}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Display Filtered Data */}
       <Grid container spacing={6}>
-        {categoryFilteredData.map((row, index) => (
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
-            lg={3}
-            key={index}
-            style={styles.gridItem}
-          >
+        {filteredData.map((row, index) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
             <Card style={styles.card}>
               <CardMedia
                 component="img"
@@ -118,44 +217,20 @@ function ListTable() {
                 image={row.IMAGE}
                 alt="item Image"
               />
-              <CardContent style={styles.cardContent}>
-                <div style={styles.detailRow}>
-                  <Typography variant="subtitle1" style={styles.label}>
-                    ITEM:
-                  </Typography>
-                  <Typography variant="body1" style={styles.value}>
-                    {row.ITEM}
-                  </Typography>
-                </div>
-                <div style={styles.detailRow}>
-                  <Typography variant="subtitle1" style={styles.label}>
-                    CATEGORY:
-                  </Typography>
-                  <Typography variant="body1" style={styles.value}>
-                    {row.CATEGORY}
-                  </Typography>
-                </div>
-                <div style={styles.detailRow}>
-                  <Typography variant="subtitle1" style={styles.label}>
-                    BRAND:
-                  </Typography>
-                  <Typography variant="body1" style={styles.value}>
-                    {row.BRAND}
-                  </Typography>
-                </div>
-                <Divider style={styles.divider} />
+              <CardContent>
+                <Typography variant="subtitle1">ITEM: {row.ITEM}</Typography>
+                <Typography variant="subtitle1">
+                  CATEGORY: {row.CATEGORY}
+                </Typography>
+                <Typography variant="subtitle1">NAME: {row.DisplayName}</Typography>
+                <Divider />
                 <Button
                   variant="contained"
                   endIcon={<ArrowForwardIcon />}
                   onClick={() => handleMoreDetails(row.BRAND)}
-                  style={styles.moreDetailsButton}
                 >
                   More Details
                 </Button>
-                <IconButton
-                  onClick={() => handleMoreDetails(row.BRAND)}
-                  style={styles.arrowButton}
-                ></IconButton>
               </CardContent>
             </Card>
           </Grid>
@@ -166,21 +241,49 @@ function ListTable() {
 }
 
 const styles = {
+  filterTExt: {
+    color: "#FFD700",
+    fontWeight: "bold",
+    fontSize: "2rem",
+  },
+  backButton: {
+    position: "fixed", // Fixed to the top-right
+    top: "70px",
+    right: "50px", // Adjusted for vertical layout
+    backgroundColor: "#FFD700",
+    color: "#000",
+    fontWeight: "bold",
+    fontSize: "1.8rem", // Larger font size for back button
+    padding: "20px 50px", // Larger button padding
+    zIndex: 1000,
+    "&:hover": {
+      backgroundColor: "#FFC107",
+    },
+  },
   container: {
-    padding: "70px",
+    padding: "70px", // More padding for high resolution
     backgroundColor: "#121212",
-    minHeight: "100vh",
+    color: "#FFD700",
+    minHeight: "97vh",
   },
   title: {
-    marginBottom: "40px",
+    marginBottom: "50px",
     fontWeight: "bold",
     color: "#FFD700",
+    fontSize: "5rem", // Larger font size for readability
     textAlign: "center",
-    fontSize: "3.5rem",
+  },
+  filterButton: {
+    marginBottom: "20px",
+    backgroundColor: "#FFD700",
+    color: "#000",
+    "&:hover": {
+      backgroundColor: "#FFC107",
+    },
   },
   dropdown: {
-    marginBottom: "40px",
-    minWidth: 400,
+    minWidth: "250px",
+    margin: "0 20px",
   },
   inputLabel: {
     color: "#FFD700",
@@ -194,55 +297,38 @@ const styles = {
     transition: "transform 0.3s",
     marginBottom: "20px",
   },
-  cardContent: {
-    padding: "24px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
+  dialogTitle: {
+    backgroundColor: "#000",
+    color: "#FFD700", // gold color
+    padding: "20px 40px",
+    fontSize: "1.5rem",
   },
-  detailRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    width: "100%",
-    marginBottom: "16px",
+  dialogContent: {
+    backgroundColor: "#000",
+    color: "#FFD700", // gold color
+    padding: "20px 70px",
+    minWidth: "300px",
   },
-  label: {
-    fontWeight: "bold",
-    color: "#FFD700",
+  dropdown: {
+    margin: "8px",
+    minWidth: "200px",
+    backgroundColor: "#000",
+    color: "#FFD700", // gold color
   },
-  value: {
-    color: "#E0E0E0",
+  inputLabel: {
+    color: "#FFD700", // gold color
   },
-  noData: {
-    color: "#FFD700",
-    textAlign: "center",
-    padding: "40px",
-    fontSize: "2rem",
+  select: {
+    color: "#FFD700", // gold color
+    backgroundColor: "#333", // dark background for the select
   },
-  backButton: {
-    float: "right",
-    marginBottom: "40px",
-    backgroundColor: "#FFD700",
-    color: "#000",
-    fontWeight: "bold",
-    fontSize: "1.2rem",
-    "&:hover": {
-      backgroundColor: "#FFC107",
-    },
+  dialogActions: {
+    backgroundColor: "#000",
+    padding: "10px",
   },
-  divider: {
-    width: "100%",
-    margin: "16px 0",
-    backgroundColor: "#FFD700",
-  },
-  moreDetailsButton: {
-    backgroundColor: "#FFD700",
-    color: "#000",
-    fontWeight: "bold",
-    marginTop: "16px",
-    "&:hover": {
-      backgroundColor: "#FFC107",
-    },
+  closeButton: {
+    color: "#FFD700", // gold color
+    margin: "8px",
   },
 };
 

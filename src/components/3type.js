@@ -1,21 +1,23 @@
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { Typography, Button, Card, CardContent, Grid } from "@mui/material";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { useNavigate, useParams } from "react-router-dom";
 
 function CategoryDetailPage() {
-  const { category } = useParams(); // Get the category from the URL
   const navigate = useNavigate();
+  const { category } = useParams();
+  // Categories and their corresponding images
+  const categories = [
+    { name: "Domestic", image: "/images/domestic.png" },
+    { name: "International", image: "/images/international.png" },
+  ];
 
-  // Static data for each category type
-  const types = ["premium", "luxury", "regular"];
-
-  const handleNavigate = (type) => {
-    navigate(`/list?list=${category}&category=${type}`);
+  const handleNavigate = (value) => {
+    navigate(`/list?list=${category}&category=${value}`);
   };
 
   return (
     <div style={styles.container}>
+      {/* Back Button */}
       <Button
         onClick={() => navigate(-1)} // Navigates to the previous page
         variant="contained"
@@ -25,62 +27,59 @@ function CategoryDetailPage() {
       </Button>
 
       <Typography variant="h3" style={styles.title}>
-        {category} Category
+        CHOOSE CATEGORY
       </Typography>
-      <div style={styles.center}>
-        <Grid
-          container
-          direction="column"
-          alignItems="center"
-          spacing={5}
-          style={styles.gridContainer}
-        >
-          {types.map((type, index) => (
-            <Grid item xs={12} key={index} style={styles.gridItem}>
-              <Card style={styles.card}>
-                <CardContent style={styles.cardContent}>
-                  <Typography variant="h5" style={styles.cardTitle}>
-                    {type}
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    endIcon={<ArrowForwardIcon />}
-                    style={styles.arrowButton}
-                    onClick={() => handleNavigate(type)}
-                  >
-                    View {type}
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </div>
+
+      {/* Categories Grid */}
+      <Grid container spacing={6} justifyContent="center" alignItems="center">
+        {categories.map((row, index) => (
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            key={index}
+            style={styles.gridItem}
+            onClick={() => handleNavigate(row.name)}
+          >
+            <Card style={styles.card}>
+              <Typography variant="h5" style={styles.rowName}>
+                {category}
+              </Typography>
+              <CardContent style={styles.cardContent}>
+                <img src={row.image} alt={row.name} style={styles.image} />
+              </CardContent>
+              <Button variant="contained" style={styles.button}>
+                {row.name}
+              </Button>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
     </div>
   );
 }
 
 const styles = {
-  center: {
-    display: "flex",
-    alignItems: "center",
-    flexDirection: "column",
-    justifyContent: "center",
-    marginTop: "15rem",
-  },
   container: {
-    padding: "70px",
+    padding: "70px", // More padding for high resolution
     backgroundColor: "#121212",
-    minHeight: "100vh",
+    color: "#FFD700",
+    minHeight: "97vh",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
   },
   backButton: {
-    float: "right",
-    marginBottom: "40px",
+    position: "fixed", // Fixed to the top-left
+    top: "70px",
+    left: "50px", // Adjusted for horizontal layout
     backgroundColor: "#FFD700",
     color: "#000",
     fontWeight: "bold",
-    fontSize: "1.2rem",
-    padding: "10px 20px",
+    fontSize: "1.8rem", // Larger font size for back button
+    padding: "20px 50px", // Larger button padding
+    zIndex: 1000,
     "&:hover": {
       backgroundColor: "#FFC107",
     },
@@ -89,47 +88,65 @@ const styles = {
     marginBottom: "50px",
     fontWeight: "bold",
     color: "#FFD700",
-    fontSize: "3.5rem",
+    fontSize: "5rem", // Larger font size for readability
     textAlign: "center",
   },
-  gridContainer: {
-    width: "100%",
-    maxWidth: "1000px",
-  },
   gridItem: {
-    width: "100%",
-    margin: "50px 0px",
+    margin: "80px 40px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    cursor: "pointer",
   },
   card: {
+    width: "450px", // Increased width for large displays
+    height: "500px", // Taller cards for high-resolution display
+    boxShadow: "0px 15px 30px rgba(255, 215, 0, 0.5)",
+    borderRadius: "25px",
     backgroundColor: "#1E1E1E",
-    color: "#FFD700",
-    boxShadow: "0px 12px 30px rgba(255, 215, 0, 0.3)",
-    borderRadius: "20px",
-    padding: "60px 40px", // Adjusted padding for consistent card spacing
-    transition: "transform 0.3s ease",
+    padding: "50px",
+    transition: "transform 0.3s",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    alignItems: "center",
     "&:hover": {
       transform: "scale(1.05)",
     },
   },
   cardContent: {
+    flex: 1,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "20px",
+    justifyContent: "center",
+    textAlign: "center",
   },
-  cardTitle: {
-    fontWeight: "600",
-    fontSize: "1.8rem",
+  image: {
+    width: "180px", // Larger image size
+    height: "180px",
+    borderRadius: "12px",
+    objectFit: "cover",
+    marginBottom: "25px",
   },
-  arrowButton: {
-    backgroundColor: "#FFD700",
+  categoryName: {
+    fontWeight: "800",
+    fontSize: "2rem", // Larger font for category names
+    color: "#FFD700",
+    marginBottom: "20px", // Space between the image and name
+  },
+  button: {
     color: "#000",
+    backgroundColor: "#FFD700",
     fontWeight: "bold",
-    padding: "12px 24px",
-    fontSize: "1rem",
+    padding: "15px 40px", // Larger button size
+    fontSize: "1.5rem",
     "&:hover": {
       backgroundColor: "#FFC107",
     },
+  },
+  rowName: {
+    color: "#FFD700",
   },
 };
 

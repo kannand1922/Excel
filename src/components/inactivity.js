@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { useLocation } from "react-router-dom";
 const InactivityRedirect = ({ children }) => {
   const [lastActiveTime, setLastActiveTime] = useState(Date.now());
   const navigate = useNavigate();
 
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
   // Function to reset the inactivity timer on any user interaction
   const resetIdleTimer = () => {
     setLastActiveTime(Date.now());

@@ -70,10 +70,18 @@ function ItemDetail() {
             <CardContent style={styles.cardContent}>
               <div style={styles.detailRow}>
                 <Typography variant="subtitle1" style={styles.label}>
-                  ITEM:
+                  NAME:
                 </Typography>
                 <Typography variant="body1" style={styles.value}>
-                  {selectedItem.ITEM}
+                  {selectedItem.DisplayName}
+                </Typography>
+              </div>
+              <div style={styles.detailRow}>
+                <Typography variant="subtitle1" style={styles.label}>
+                  DESCRIPTION:
+                </Typography>
+                <Typography variant="body1" style={styles.value}>
+                  {selectedItem.Description}
                 </Typography>
               </div>
               <div style={styles.detailRow}>
@@ -93,7 +101,11 @@ function ItemDetail() {
                   key !== "ITEM" &&
                   key !== "BRAND" &&
                   key !== "CATEGORY" &&
-                  key !== "IMAGE"
+                  key !== "IMAGE" &&
+                  key !== "Description" &&
+                  key !== "COST" &&
+                  key !== "DisplayName" &&
+                  key !== "TYPE"
                 ) {
                   return (
                     <div style={styles.detailRow} key={key}>
